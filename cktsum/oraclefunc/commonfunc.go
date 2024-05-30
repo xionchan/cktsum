@@ -68,7 +68,7 @@ func splistTab(rowidr chan [2]string) {
 						  where a.segment_name = b.object_name  AND (a.PARTITION_NAME is null or a.PARTITION_NAME = b.SUBOBJECT_NAME)  
 						  and a.owner = b.owner and a.owner = '` + Table.Owner + "' and a.segment_name = '" + Table.Name + "' and a.partition_name = '" + strings.ToUpper(partName[1]) + "'"
 	} else {
-		getTabRowSql = "select coalesce(num_rows, 0) from all_tables where table_name = '" + Table.Owner + "' and owner = '" + Table.Name + "'"
+		getTabRowSql = "select coalesce(num_rows, 0) from all_tables where table_name = '" + Table.Name + "' and owner = '" + Table.Owner + "'"
 
 		getExtentRowidSql = `select dbms_rowid.rowid_create(1, data_object_id, relative_fno, block_id, 0), 
        							 dbms_rowid.rowid_create(1, data_object_id, relative_fno, block_id + blocks - 1, 32767) 

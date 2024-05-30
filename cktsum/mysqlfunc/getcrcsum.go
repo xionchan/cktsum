@@ -85,7 +85,7 @@ func getCrc32(idxChan chan colIdx, partcrc chan float64) {
 		return
 	}
 
-	if Wherec == "" && PartMode {
+	if Wherec == "" || PartMode {
 		firstQuery = commonSqlStr + " where " + IdxColName + " <= ?"
 		endQuery = commonSqlStr + " where " + IdxColName + " > ?"
 		nextQuery = commonSqlStr + " where " + IdxColName + " <= ? and " + IdxColName + " > ?"

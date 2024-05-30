@@ -10,6 +10,3 @@ func main() {
 	cmd.ParseArgs()
 	cmd.Compredate()
 }
-
-
-this is

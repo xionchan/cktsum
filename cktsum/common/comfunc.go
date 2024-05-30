@@ -104,8 +104,9 @@ func CreateDbConn(dbdsn DBConnection) (*sql.DB, error) {
 	var db *sql.DB
 
 	if dbdsn.Type == "oracle" {
-		dsn := `user="` + dbdsn.User + `" password="` + dbdsn.Password + `" connectString="(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=` + dbdsn.Host +
-			`)(PORT=` + dbdsn.Port + `))(CONNECT_DATA=(SERVICE_NAME=` + dbdsn.Database + `)))" heterogeneousPool=false standaloneConnection=true timezone="+08:00"`
+		// dsn := `user="` + dbdsn.User + `" password="` + dbdsn.Password + `" connectString="(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=` + dbdsn.Host +
+		//	`)(PORT=` + dbdsn.Port + `))(CONNECT_DATA=(SERVICE_NAME=` + dbdsn.Database + `)))" heterogeneousPool=false standaloneConnection=true timezone="+08:00"`
+		dsn := dbdsn.User + "/" + dbdsn.Password + "@" + dbdsn.Host + ":" + dbdsn.Port + "/" + dbdsn.Database
 		db, err = sql.Open("godror", dsn)
 	} else if dbdsn.Type == "mysql" {
 		dsn := dbdsn.User + ":" + dbdsn.Password + "@tcp(" + dbdsn.Host + ":" + dbdsn.Port + ")/" + dbdsn.Database + "?parseTime=true&loc=Local"

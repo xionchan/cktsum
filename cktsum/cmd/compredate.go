@@ -79,7 +79,9 @@ func Compredate() {
 	sourcewg.Wait()
 	targetwg.Wait()
 
-	if sourceCrcSum != targetCrcSum {
+	sourceCrcSumI := int64(sourceCrcSum * 100)
+	targetCrcSumI := int64(targetCrcSum * 100)
+	if sourceCrcSumI != targetCrcSumI {
 		fmt.Printf("校验失败 : 源端和目标端的校验和不一致 (%s:%0.2f - %s:%0.2f)\n", common.ST.Owner+"."+common.ST.Name, sourceCrcSum, common.TT.Owner+"."+common.TT.Name, targetCrcSum)
 		os.Exit(1)
 	} else {

@@ -53,7 +53,7 @@ func dbGetCrc32(rowidr chan [2]string, partcrc chan float64) {
 		return
 	}
 
-	if Wherec == "" && PartMode {
+	if Wherec == "" || PartMode {
 		rowidDataSql = oCrcSql + " where rowid between :1 and :2"
 	} else {
 		rowidDataSql = oCrcSql + " and rowid between :1 and :2"

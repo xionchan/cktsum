@@ -22,31 +22,12 @@ func extGetCrc32(rowidr chan [2]string, partcrc chan float64) {
 	}
 	defer dbconn.Close()
 
-	// 格式化时间格式
-	_, err = dbconn.Exec("alter session set nls_date_format = 'yyyy-mm-dd hh24:mi:ss'")
-	if err != nil {
-		_, file, line, _ := runtime.Caller(0)
-		log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
-	}
-
-	_, err = dbconn.Exec("alter session set nls_timestamp_format = 'yyyy-mm-dd hh24:mi:ss.FF'")
-	if err != nil {
-		_, file, line, _ := runtime.Caller(0)
-		log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
-	}
-
-	_, err = dbconn.Exec("alter session set nls_timestamp_tz_format = 'yyyy-mm-dd hh24:mi:ss.FF'")
-	if err != nil {
-		_, file, line, _ := runtime.Caller(0)
-		log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
-	}
-
 	oCrcSql := genQuerySql()
 
 	// 定义存放一行数据的接口切片的长度, 通过查询SQL获取
 	var rowidDataSql, checkColLenSql string
 	var rows *sql.Rows
-	if Wherec == "" && PartMode {
+	if Wherec == "" || PartMode {
 		checkColLenSql = oCrcSql + " where rownum < 2"
 		rowidDataSql = oCrcSql + " where rowid between :1 and :2"
 	} else {
@@ -80,6 +61,25 @@ func extGetCrc32(rowidr chan [2]string, partcrc chan float64) {
 		log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
 	}
 	defer stmt.Close()
+
+	// 格式化时间格式
+	_, err = dbconn.Exec("alter session set nls_date_format = 'yyyy-mm-dd hh24:mi:ss'")
+	if err != nil {
+		_, file, line, _ := runtime.Caller(0)
+		log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
+	}
+
+	_, err = dbconn.Exec("alter session set nls_timestamp_format = 'yyyy-mm-dd hh24:mi:ss.FF'")
+	if err != nil {
+		_, file, line, _ := runtime.Caller(0)
+		log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
+	}
+
+	_, err = dbconn.Exec("alter session set nls_timestamp_tz_format = 'yyyy-mm-dd hh24:mi:ss.FF'")
+	if err != nil {
+		_, file, line, _ := runtime.Caller(0)
+		log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
+	}
 
 	var crc32 float64 = 0
 	var onecrc uint64 = 0

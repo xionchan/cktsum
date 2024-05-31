@@ -4,12 +4,14 @@ package oraclefunc
 
 import (
 	"cktsum/common"
+	"database/sql"
+	"github.com/shopspring/decimal"
 	"log"
 	"runtime"
 )
 
 // 在数据库内部使用Java函数计算crc32
-func dbGetCrc32(rowidr chan [2]string, partcrc chan float64) {
+func dbGetCrc32(rowidr chan [2]string, partcrc chan decimal.Decimal) {
 	// 每个进程都要创建一个数据库连接来并行计算
 	dbconn, err := common.CreateDbConn(Dsn)
 	if err != nil {
@@ -39,17 +41,29 @@ func dbGetCrc32(rowidr chan [2]string, partcrc chan float64) {
 
 	// 计算返回一行的个数
 	var rowidDataSql string
-	var crc32 float64
+	var valueStr sql.NullString
+	numsum := decimal.NewFromFloat(0.0)
 	oCrcSql := genQuerySql()
 
 	// 非并行模式
 	if !ParaMode {
-		err := dbconn.QueryRow(oCrcSql).Scan(&crc32)
+		err := dbconn.QueryRow(oCrcSql).Scan(&valueStr)
 		if err != nil {
 			_, file, line, _ := runtime.Caller(0)
 			log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
 		}
-		partcrc <- crc32
+
+		if valueStr.Valid {
+			numsum, err = decimal.NewFromString(valueStr.String)
+			if err != nil {
+				_, file, line, _ := runtime.Caller(0)
+				log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
+			}
+			partcrc <- numsum
+		} else {
+			partcrc <- decimal.NewFromFloat(0.0)
+		}
+
 		return
 	}
 
@@ -67,12 +81,30 @@ func dbGetCrc32(rowidr chan [2]string, partcrc chan float64) {
 	defer stmt.Close()
 
 	for rowid := range rowidr {
-		err := stmt.QueryRow(rowid[0], rowid[1]).Scan(&crc32)
+		rows, err := stmt.Query(rowid[0], rowid[1])
 		if err != nil {
 			_, file, line, _ := runtime.Caller(0)
 			log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
 		}
-		partcrc <- crc32
+
+		for rows.Next() {
+			err = rows.Scan(&valueStr)
+			if err != nil {
+				_, file, line, _ := runtime.Caller(0)
+				log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
+			}
+
+			if valueStr.Valid {
+				numsum, err = decimal.NewFromString(valueStr.String)
+				if err != nil {
+					_, file, line, _ := runtime.Caller(0)
+					log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
+				}
+				partcrc <- numsum
+			} else {
+				partcrc <- decimal.NewFromFloat(0.0)
+			}
+		}
 	}
 	return
 }

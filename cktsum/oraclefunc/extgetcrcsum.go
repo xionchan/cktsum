@@ -7,13 +7,14 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/godror/godror"
+	"github.com/shopspring/decimal"
 	"log"
+	"math/big"
 	"runtime"
-	"strconv"
 )
 
 // 将数据传输到客户端逐行计算crc32
-func extGetCrc32(rowidr chan [2]string, partcrc chan float64) {
+func extGetCrc32(rowidr chan [2]string, partcrc chan decimal.Decimal) {
 	// 每个进程都要创建一个数据库连接来并行计算
 	dbconn, err := common.CreateDbConn(Dsn)
 	if err != nil {
@@ -81,7 +82,8 @@ func extGetCrc32(rowidr chan [2]string, partcrc chan float64) {
 		log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
 	}
 
-	var crc32 float64 = 0
+	// var crc32 decimal.Decimal
+	numsum := decimal.NewFromFloat(0.0)
 	var onecrc uint64 = 0
 
 	for rowid := range rowidr {
@@ -114,12 +116,13 @@ func extGetCrc32(rowidr chan [2]string, partcrc chan float64) {
 					onecrc += cr32
 				case godror.Number:
 					intval := fmt.Sprintf("%v", val)
-					num, err := strconv.ParseFloat(intval, 32)
+					num, err := decimal.NewFromString(intval)
+					// num, err := strconv.ParseFloat(intval, 32)
 					if err != nil {
 						_, file, line, _ := runtime.Caller(0)
 						log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
 					}
-					crc32 += num
+					numsum = numsum.Add(num)
 				default:
 					cr32 := common.ComputeCrc(val.([]byte))
 					onecrc += cr32
@@ -127,6 +130,7 @@ func extGetCrc32(rowidr chan [2]string, partcrc chan float64) {
 			}
 		}
 	}
-	partcrc <- crc32 + float64(onecrc)
+	numsum = numsum.Add(decimal.NewFromBigInt(new(big.Int).SetUint64(onecrc), 0))
+	partcrc <- numsum
 	return
 }

@@ -5,6 +5,7 @@ package mysqlfunc
 import (
 	"cktsum/common"
 	"database/sql"
+	"github.com/shopspring/decimal"
 	"log"
 	"runtime"
 	"strconv"
@@ -21,9 +22,9 @@ type colIdx struct {
 var IdxColName string = "" // 主键索引的第一列
 
 // 并行计算crc32
-func GetCrc32Sum() float64 {
+func GetCrc32Sum() decimal.Decimal {
 	idxChan := make(chan colIdx, common.Parallel+1)
-	crc32Chan := make(chan float64, 100000)
+	crc32Chan := make(chan decimal.Decimal, 100000)
 
 	var wg1 sync.WaitGroup
 	var wg2 sync.WaitGroup
@@ -47,16 +48,16 @@ func GetCrc32Sum() float64 {
 	wg2.Wait()
 	close(crc32Chan)
 
-	var totalCrc32Sum float64 = 0
+	totalCrc32Sum := decimal.NewFromFloat(0.0)
 	for crc := range crc32Chan {
-		totalCrc32Sum += crc
+		totalCrc32Sum = totalCrc32Sum.Add(crc)
 	}
 
 	return totalCrc32Sum
 }
 
 // 获取crc32校验和
-func getCrc32(idxChan chan colIdx, partcrc chan float64) {
+func getCrc32(idxChan chan colIdx, partcrc chan decimal.Decimal) {
 	// 每个进程都要创建一个数据库连接来并行计算
 	dbconn, err := common.CreateDbConn(Dsn)
 	if err != nil {
@@ -73,15 +74,26 @@ func getCrc32(idxChan chan colIdx, partcrc chan float64) {
 		nextQuery  string
 	)
 
-	var crc32 float64
+	var valueStr sql.NullString
+	numsum := decimal.NewFromFloat(0.0)
+
 	// 如果非并行模式
 	if !PartMode {
-		err := dbconn.QueryRow(commonSqlStr).Scan(&crc32)
+		err := dbconn.QueryRow(commonSqlStr).Scan(&valueStr)
 		if err != nil {
 			_, file, line, _ := runtime.Caller(0)
 			log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
 		}
-		partcrc <- crc32
+
+		if valueStr.Valid {
+			numsum, err = decimal.NewFromString(valueStr.String)
+			if err != nil {
+				_, file, line, _ := runtime.Caller(0)
+				log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
+			}
+		}
+
+		partcrc <- numsum
 		return
 	}
 
@@ -105,31 +117,40 @@ func getCrc32(idxChan chan colIdx, partcrc chan float64) {
 
 	for idxVal := range idxChan {
 		if idxVal.beginVal == "" && idxVal.endVal != "" {
-			err := dbconn.QueryRow(firstQuery, idxVal.endVal).Scan(&crc32)
+			err := dbconn.QueryRow(firstQuery, idxVal.endVal).Scan(&valueStr)
 			if err != nil {
 				_, file, line, _ := runtime.Caller(0)
 				log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
 			}
 		} else if idxVal.endVal == "" && idxVal.beginVal != "" {
-			err := dbconn.QueryRow(endQuery, idxVal.beginVal).Scan(&crc32)
+			err := dbconn.QueryRow(endQuery, idxVal.beginVal).Scan(&valueStr)
 			if err != nil {
 				_, file, line, _ := runtime.Caller(0)
 				log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
 			}
 		} else if idxVal.beginVal != "" && idxVal.endVal != "" {
-			err := stmt.QueryRow(idxVal.endVal, idxVal.beginVal).Scan(&crc32)
+			err := stmt.QueryRow(idxVal.endVal, idxVal.beginVal).Scan(&valueStr)
 			if err != nil {
 				_, file, line, _ := runtime.Caller(0)
 				log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
 			}
 		} else {
-			err := dbconn.QueryRow(commonSqlStr).Scan(&crc32)
+			err := dbconn.QueryRow(commonSqlStr).Scan(&valueStr)
 			if err != nil {
 				_, file, line, _ := runtime.Caller(0)
 				log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
 			}
 		}
-		partcrc <- crc32
+
+		if valueStr.Valid {
+			numsum, err = decimal.NewFromString(valueStr.String)
+			if err != nil {
+				_, file, line, _ := runtime.Caller(0)
+				log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
+			}
+		}
+
+		partcrc <- numsum
 	}
 	return
 }

@@ -4,6 +4,7 @@ package oraclefunc
 
 import (
 	"cktsum/common"
+	"github.com/shopspring/decimal"
 	"log"
 	"regexp"
 	"runtime"
@@ -12,9 +13,9 @@ import (
 )
 
 // 并行计算crc32
-func GetCrc32Sum() float64 {
+func GetCrc32Sum() decimal.Decimal {
 	rowidrChan := make(chan [2]string, common.Parallel+1) // 存放Oracle的rowid
-	crc32Chan := make(chan float64, 100000)               // 存放一个分片的crc32和
+	crc32Chan := make(chan decimal.Decimal, 100000)       // 存放一个分片的crc32和
 
 	var wg1 sync.WaitGroup
 	var wg2 sync.WaitGroup
@@ -42,9 +43,9 @@ func GetCrc32Sum() float64 {
 	wg2.Wait()
 	close(crc32Chan)
 
-	var totalCrc32Sum float64 = 0
+	totalCrc32Sum := decimal.NewFromFloat(0.0)
 	for crc := range crc32Chan {
-		totalCrc32Sum += crc
+		totalCrc32Sum = totalCrc32Sum.Add(crc)
 	}
 
 	return totalCrc32Sum

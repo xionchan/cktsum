@@ -8,6 +8,7 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1 // indirect
 	github.com/godror/godror v0.43.0 // indirect
 	github.com/godror/knownpb v0.1.1 // indirect
+	github.com/shopspring/decimal v1.4.0 // indirect
 	golang.org/x/exp v0.0.0-20240318143956-a85f2c67cd81 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 )

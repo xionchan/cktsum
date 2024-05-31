@@ -7,6 +7,7 @@ import (
 	"cktsum/mysqlfunc"
 	"cktsum/oraclefunc"
 	"fmt"
+	"github.com/shopspring/decimal"
 	"os"
 	"sync"
 )
@@ -55,7 +56,9 @@ func Compredate() {
 	common.RowCount = sourceCount
 
 	// 对比校验和
-	var sourceCrcSum, targetCrcSum float64
+	sourceCrcSum := decimal.NewFromFloat(0.0)
+	targetCrcSum := decimal.NewFromFloat(0.0)
+	// var sourceCrcSum, targetCrcSum float64
 	sourcewg.Add(1)
 	go func() {
 		defer sourcewg.Done()
@@ -79,10 +82,8 @@ func Compredate() {
 	sourcewg.Wait()
 	targetwg.Wait()
 
-	sourceCrcSumI := int64(sourceCrcSum * 100)
-	targetCrcSumI := int64(targetCrcSum * 100)
-	if sourceCrcSumI != targetCrcSumI {
-		fmt.Printf("校验失败 : 源端和目标端的校验和不一致 (%s:%0.2f - %s:%0.2f)\n", common.ST.Owner+"."+common.ST.Name, sourceCrcSum, common.TT.Owner+"."+common.TT.Name, targetCrcSum)
+	if sourceCrcSum.Equal(targetCrcSum) {
+		fmt.Printf("校验失败 : 源端和目标端的校验和不一致 (%s:%s - %s:%s)\n", common.ST.Owner+"."+common.ST.Name, sourceCrcSum.StringFixed(4), common.TT.Owner+"."+common.TT.Name, targetCrcSum.StringFixed(4))
 		os.Exit(1)
 	} else {
 		fmt.Printf("校验校验成功 : %s - %s\n", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)

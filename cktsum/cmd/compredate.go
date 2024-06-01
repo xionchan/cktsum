@@ -59,6 +59,7 @@ func Compredate() {
 	sourceCrcSum := decimal.NewFromFloat(0.0)
 	targetCrcSum := decimal.NewFromFloat(0.0)
 	// var sourceCrcSum, targetCrcSum float64
+
 	sourcewg.Add(1)
 	go func() {
 		defer sourcewg.Done()
@@ -82,8 +83,9 @@ func Compredate() {
 	sourcewg.Wait()
 	targetwg.Wait()
 
-	if sourceCrcSum.Equal(targetCrcSum) {
-		fmt.Printf("校验失败 : 源端和目标端的校验和不一致 (%s:%s - %s:%s)\n", common.ST.Owner+"."+common.ST.Name, sourceCrcSum.StringFixed(4), common.TT.Owner+"."+common.TT.Name, targetCrcSum.StringFixed(4))
+	if !sourceCrcSum.Equal(targetCrcSum) {
+		fmt.Printf("校验失败 : 源端(%s)和目标端(%s)的校验和不一致 (%s:%s - %s:%s)\n", common.SDSN.Type, common.TDSN.Type,
+			common.ST.Owner+"."+common.ST.Name, sourceCrcSum.StringFixed(4), common.TT.Owner+"."+common.TT.Name, targetCrcSum.StringFixed(4))
 		os.Exit(1)
 	} else {
 		fmt.Printf("校验校验成功 : %s - %s\n", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)

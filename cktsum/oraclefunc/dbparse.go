@@ -17,7 +17,7 @@ var Table common.Table      // 用户名.表名
 var Wherec string           // where条件
 var Collist *[]string       // 列列表的指针
 var Dsn common.DBConnection // 数据库的连接信息
-var ParaMode bool = true    // 是否是并行模式
+var ParaMode bool           // 是否是并行模式
 
 // 建立数据库连接， 初始化局部全局参数
 func DbParse(sourcet string) []string {

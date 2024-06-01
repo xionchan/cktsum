@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -17,7 +18,7 @@ var Table common.Table      // 用户名.表名
 var Wherec string           // where条件
 var Collist *[]string       // 列列表的指针
 var Dsn common.DBConnection // 数据库的连接信息
-var ParaMode bool = true    // 是否并行模式
+var ParaMode bool           // 是否并行模式
 
 // 建立数据库连接， 初始化局部全局参数
 func DbParse(sourcet string) []string {
@@ -37,6 +38,8 @@ func DbParse(sourcet string) []string {
 	MysConn = db
 
 	dbcheck()
+
+	checkPara()
 
 	return *Collist
 }
@@ -100,4 +103,30 @@ func dbcheck() {
 			os.Exit(1)
 		}
 	}
+}
+
+// 判断是否时并行模式
+func checkPara() {
+	// 从统计信息和全局变量中获取大的值作为拆分的标准
+	var tableRows uint
+	getTabRowSql := "select table_rows from information_schema.tables where table_schema = '" + Table.Owner + "' and table_name = '" +
+		Table.Name + "'"
+	err := MysConn.QueryRow(getTabRowSql).Scan(&tableRows)
+	if err != nil {
+		_, file, line, _ := runtime.Caller(0)
+		log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
+	}
+
+	if tableRows < common.RowCount {
+		tableRows = common.RowCount
+	}
+
+	// 小于100W不拆分, 并行等于1不拆分, 传入空值
+	if tableRows < 100*10000 || common.Parallel == 1 {
+		ParaMode = false
+	} else {
+		ParaMode = true
+	}
+
+	return
 }

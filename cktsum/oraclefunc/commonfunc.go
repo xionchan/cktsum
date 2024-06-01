@@ -94,6 +94,8 @@ func splistTab(rowidr chan [2]string) {
 		ParaMode = false
 		rowidr <- [2]string{"", ""}
 		return
+	} else {
+		ParaMode = true
 	}
 
 	// 获取每个extents的rowid范围

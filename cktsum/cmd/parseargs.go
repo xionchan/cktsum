@@ -40,7 +40,7 @@ func ParseArgs() {
 	oraMode := flag.String("m", "db", "可选参数, [db|external], Oracle数据库计算crc32的方式")
 	colStr := flag.String("c", "", "可选参数, 指定列列表, 如果要保留原始大小写，使用双引号")
 	dbPara := flag.Int("p", 1, "可选参数, 指定数据库的并行度, 最大16")
-	fetchSize := flag.Int("f", 10000, "可选参数，指定每个分片的大小, 默认10000，过大可能导致内存溢出")
+	fetchSize := flag.Int("f", 500000, "可选参数，指定每个分片的大小, 默认500000，过大可能导致内存溢出")
 	sWhere := flag.String("w", "", "可选参数，源库的where条件")
 	tWhere := flag.String("W", "", "可选参数，源库的where条件")
 	sTable := flag.String("b", "", "可选参数, 指定源库表名, 默认转换为大写, 如果要保留原始大小写，使用双引号")

@@ -107,6 +107,12 @@ func dbcheck() {
 
 // 判断是否时并行模式
 func checkPara() {
+	// 如果并行是1， 那么直接返回
+	if common.Parallel == 1 {
+		ParaMode = false
+		return
+	}
+
 	// 从统计信息和全局变量中获取大的值作为拆分的标准
 	var tableRows uint
 	getTabRowSql := "select table_rows from information_schema.tables where table_schema = '" + Table.Owner + "' and table_name = '" +
@@ -122,7 +128,7 @@ func checkPara() {
 	}
 
 	// 小于100W不拆分, 并行等于1不拆分, 传入空值
-	if tableRows < 100*10000 || common.Parallel == 1 {
+	if tableRows < 100*10000 {
 		ParaMode = false
 	} else {
 		ParaMode = true

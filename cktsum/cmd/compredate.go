@@ -14,6 +14,7 @@ import (
 
 // 校验源端和目标端数据是否一致，先对比行数，在对比数据校验和
 func Compredate() {
+
 	// 对比行数
 	var sourceCount, targetCount uint
 
@@ -58,7 +59,6 @@ func Compredate() {
 	// 对比校验和
 	sourceCrcSum := decimal.NewFromFloat(0.0)
 	targetCrcSum := decimal.NewFromFloat(0.0)
-	// var sourceCrcSum, targetCrcSum float64
 
 	sourcewg.Add(1)
 	go func() {
@@ -79,7 +79,6 @@ func Compredate() {
 			targetCrcSum = mysqlfunc.GetCrc32Sum()
 		}
 	}()
-
 	sourcewg.Wait()
 	targetwg.Wait()
 
@@ -88,6 +87,8 @@ func Compredate() {
 			common.ST.Owner+"."+common.ST.Name, sourceCrcSum.StringFixed(4), common.TT.Owner+"."+common.TT.Name, targetCrcSum.StringFixed(4))
 		os.Exit(1)
 	} else {
-		fmt.Printf("校验校验成功 : %s - %s\n", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)
+		fmt.Printf("校验成功 : 源端(%s)和目标端(%s)的校验和一致 (%s:%s - %s:%s)\n", common.SDSN.Type, common.TDSN.Type,
+			common.ST.Owner+"."+common.ST.Name, sourceCrcSum.StringFixed(4), common.TT.Owner+"."+common.TT.Name, targetCrcSum.StringFixed(4))
+		// fmt.Printf("校验校验成功 : %s - %s\n", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)
 	}
 }

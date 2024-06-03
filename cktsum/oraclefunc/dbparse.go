@@ -7,6 +7,8 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"regexp"
+	"runtime"
 	"strings"
 )
 
@@ -37,6 +39,7 @@ func DbParse(sourcet string) []string {
 	OraConn = db
 
 	dbcheck()
+	checkPara()
 
 	return *Collist
 }
@@ -121,4 +124,44 @@ func dbcheck() {
 			common.OraMode = "external"
 		}
 	}
+}
+
+// 判断是否是并行模式
+func checkPara() {
+	// 如果并行是1, 那么直接返回
+	if common.Parallel == 1 {
+		ParaMode = false
+		return
+	}
+
+	// 获取对象的行数
+	var getTabRowSql string
+	if PartMode {
+		// 获取分区名字： 括号内的字符串，并转换为大写
+		re := regexp.MustCompile(`\(([^)]+)\)`)
+		partName := re.FindStringSubmatch(Wherec)
+		getTabRowSql = "select coalesce(num_rows, 0) from all_tab_partitions where table_name = '" + Table.Name + "' and table_owner = '" +
+			Table.Owner + "' and partition_name = '" + strings.ToUpper(partName[1]) + "'"
+	} else {
+		getTabRowSql = "select coalesce(num_rows, 0) from all_tables where table_name = '" + Table.Name + "' and owner = '" + Table.Owner + "'"
+	}
+
+	var tableRows uint
+	err := OraConn.QueryRow(getTabRowSql).Scan(&tableRows)
+	if err != nil {
+		_, file, line, _ := runtime.Caller(0)
+		log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
+	}
+
+	if tableRows < common.RowCount {
+		tableRows = common.RowCount
+	}
+
+	// 如果小于100W, 或者并行度为1, 那么不拆分
+	if tableRows < 100*10000 {
+		ParaMode = false
+	} else {
+		ParaMode = true
+	}
+	return
 }

@@ -27,6 +27,7 @@ func GetCrc32Sum() decimal.Decimal {
 
 	if !ParaMode {
 		noParaCrc(crc32Chan)
+		close(crc32Chan)
 	} else {
 		idxChan := make(chan colIdx, common.Parallel+1)
 
@@ -190,6 +191,12 @@ func getFirstPri() {
 
 // 判断是否要进行拆分，按照主键索引的第一个列拆分
 func splitIdx(idxChan chan colIdx) {
+	/*
+		逻辑 ：
+		第一个sql : select id from table limit order by id 10,1;  传入["", cur_id]
+		后续的sql : select id from table where id > 11 order by id limit 10,1;   该语句中id大于的值是前一个sql获取的id值; 传入 [pre_id, cur_id]
+		最后的sql : select id from table where id > 11 order by id limit 10,1;   获取的值为空值，传入[pre_id, ""]
+	*/
 	firstQuery := "select " + IdxColName + " from " + Table.Owner + "." + Table.Name + " order by " +
 		IdxColName + " limit " + strconv.Itoa(common.FetchSize) + ",1"
 	nextQuery := "select " + IdxColName + " from " + Table.Owner + "." + Table.Name + " where " +

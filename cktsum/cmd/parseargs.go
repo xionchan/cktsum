@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 // 重写Uasge
@@ -48,6 +49,9 @@ func ParseArgs() {
 
 	flag.Parse()
 	flag.Usage = usage
+
+	common.StartTime = time.Now()
+	fmt.Println("cktsum开始进行异构数据库表数据对比...")
 
 	var err error
 	// 强制参数sourceDsn, 校验格式, 并更新源库信息, 校验数据库的连通性
@@ -235,7 +239,7 @@ func dbParseArgs() {
 
 	// 校验列
 	if !common.AreSliceEqual(sourceList, targetList, false) {
-		log.Println("对比失败 : 源端和目标端的列不一致!")
+		fmt.Printf("校验失败 : 源端(%s)和目标端(%s)的列不一致!", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)
 		os.Exit(1)
 	}
 }

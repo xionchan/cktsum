@@ -8,7 +8,6 @@ import (
 	"hash/crc32"
 	"reflect"
 	"regexp"
-	"sort"
 	"strings"
 )
 
@@ -176,8 +175,8 @@ func AreValuesEqual(a, b interface{}) bool {
 // 对比两个切片是否一致
 func AreSliceEqual(s1, s2 []string, casesen bool) bool {
 	// 排序
-	sort.Strings(s1)
-	sort.Strings(s2)
+	//sort.Strings(s1)
+	//sort.Strings(s2)
 
 	if casesen {
 		return reflect.DeepEqual(s1, s2)

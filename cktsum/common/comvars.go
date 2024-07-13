@@ -1,6 +1,8 @@
 // 定义全局变量
 package common
 
+import "time"
+
 var (
 	SDSN      DBConnection // 源库的连接串
 	TDSN      DBConnection // 目标库的连接串
@@ -17,6 +19,7 @@ var (
 	RowCount  uint         // 行数
 	SPartMode bool         // 源库是否是分区模式
 	TPartMode bool         // 目标库是否是分区模式
+	StartTime time.Time    // 定义程序的开始时间
 )
 
 // 定义数据库连接的结构

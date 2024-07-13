@@ -5,18 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7cf81b2b-976c-47c1-9f5e-1892d4ffc8e1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/cktsum/oraclefunc/getcrcsum.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/cktsum.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cktsum.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cktsum/cktsum" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/cktsum" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cktsum/cmd/compredate.go" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/cmd/compredate.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cktsum/cmd/parseargs.go" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/cmd/parseargs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cktsum/common/comfunc.go" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/common/comfunc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cktsum/common/comvars.go" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/common/comvars.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cktsum/mysqlfunc/dbparse.go" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/mysqlfunc/dbparse.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cktsum/mysqlfunc/getcrcsum.go" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/mysqlfunc/getcrcsum.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cktsum/mysqlfunc/parallel.go" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/mysqlfunc/parallel.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cktsum/oraclefunc/commonfunc.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cktsum/oraclefunc/dbgetcrcsum.go" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/oraclefunc/dbgetcrcsum.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cktsum/oraclefunc/dbparse.go" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/oraclefunc/dbparse.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cktsum/oraclefunc/extgetcrcsum.go" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/oraclefunc/extgetcrcsum.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cktsum/test" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cktsum/test.go" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,7 +68,7 @@
       <window_info id="Pull Requests" show_stripe_button="false" />
       <window_info id="Learn" show_stripe_button="false" />
       <window_info id="DFA" show_stripe_button="false" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.14160156" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.073177084" />
       <window_info id="Commit" order="1" weight="0.25" />
       <window_info id="Structure" order="2" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Database Changes" show_stripe_button="false" />
@@ -84,7 +80,7 @@
       <window_info anchor="bottom" id="Problems View" order="2" />
       <window_info anchor="bottom" id="Terminal" order="3" />
       <window_info anchor="bottom" id="Services" order="4" />
-      <window_info anchor="bottom" id="Find" order="4" weight="0.3301006" />
+      <window_info anchor="bottom" id="Find" order="5" weight="0.3301006" />
       <window_info anchor="right" id="Endpoints" show_stripe_button="false" />
       <window_info anchor="right" id="make" show_stripe_button="false" side_tool="true" />
       <window_info anchor="right" id="Coverage" show_stripe_button="false" side_tool="true" />
@@ -98,8 +94,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-gosdk-a64d1c07081b-6117e8e62afb-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-242.12881.47" />
-        <option value="bundled-js-predefined-d6986cc7102b-433cfb1f11c8-JavaScript-GO-242.12881.47" />
+        <option value="bundled-gosdk-5df93f7ad4aa-dfc284eb1eb8-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-242.20224.39" />
+        <option value="bundled-js-predefined-d6986cc7102b-410509235cf1-JavaScript-GO-242.20224.39" />
       </set>
     </attachedChunks>
   </component>

@@ -10,6 +10,7 @@ import (
 	"github.com/shopspring/decimal"
 	"os"
 	"sync"
+	"time"
 )
 
 // 校验源端和目标端数据是否一致，先对比行数，在对比数据校验和
@@ -44,12 +45,14 @@ func Compredate() {
 	sourcewg.Wait()
 	targetwg.Wait()
 	if sourceCount != targetCount {
-		fmt.Printf("校验失败 : 源端和目标端的总行数不一致 (%s:%d - %s:%d)\n", common.ST.Owner+"."+common.ST.Name, sourceCount, common.TT.Owner+"."+common.TT.Name, targetCount)
+		elapsedSeconds := time.Now().Sub(common.StartTime).Seconds()
+		fmt.Printf("校验失败,耗时(%.2f秒) : 源端(%s)和目标端(%s)的总行数不一致 (%s:%d - %s:%d)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
+			common.ST.Owner+"."+common.ST.Name, sourceCount, common.TT.Owner+"."+common.TT.Name, targetCount)
 		os.Exit(1)
 	}
 
 	if sourceCount == 0 {
-		fmt.Printf("校验校验成功 : %s - %s\n", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)
+		fmt.Printf("校验成功 : 源端(%s)和目标端(%s)无数据\n", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)
 		return
 	}
 
@@ -82,12 +85,14 @@ func Compredate() {
 	sourcewg.Wait()
 	targetwg.Wait()
 
+	elapsedSeconds := time.Now().Sub(common.StartTime).Seconds()
+
 	if !sourceCrcSum.Equal(targetCrcSum) {
-		fmt.Printf("校验失败 : 源端(%s)和目标端(%s)的校验和不一致 (%s:%s - %s:%s)\n", common.SDSN.Type, common.TDSN.Type,
+		fmt.Printf("校验失败,耗时(%.2f秒) : 源端(%s)和目标端(%s)的校验和不一致 (%s:%s - %s:%s)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
 			common.ST.Owner+"."+common.ST.Name, sourceCrcSum.StringFixed(4), common.TT.Owner+"."+common.TT.Name, targetCrcSum.StringFixed(4))
 		os.Exit(1)
 	} else {
-		fmt.Printf("校验成功 : 源端(%s)和目标端(%s)的校验和一致 (%s:%s - %s:%s)\n", common.SDSN.Type, common.TDSN.Type,
+		fmt.Printf("校验成功,耗时(%.2f秒) : 源端(%s)和目标端(%s)的校验和一致 (%s:%s - %s:%s)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
 			common.ST.Owner+"."+common.ST.Name, sourceCrcSum.StringFixed(4), common.TT.Owner+"."+common.TT.Name, targetCrcSum.StringFixed(4))
 		// fmt.Printf("校验校验成功 : %s - %s\n", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)
 	}

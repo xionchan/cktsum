@@ -5,6 +5,7 @@ package mysqlfunc
 import (
 	"cktsum/common"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -99,6 +100,7 @@ func dbcheck() {
 		}
 		_, err := MysConn.Exec(checkSql)
 		if err != nil {
+			fmt.Println(checkSql)
 			log.Println("程序错误 : mysql传入的where条件有误 " + Table.Owner + "." + Table.Name)
 			os.Exit(1)
 		}

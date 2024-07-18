@@ -5,6 +5,7 @@ package oraclefunc
 import (
 	"cktsum/common"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -101,6 +102,7 @@ func dbcheck() {
 		}
 		_, err := OraConn.Exec(checkSql)
 		if err != nil {
+			fmt.Println(checkSql)
 			log.Println("程序错误 : oracle传入的where条件有误 " + Table.Owner + "." + Table.Name)
 			os.Exit(1)
 		}

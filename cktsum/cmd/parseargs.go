@@ -24,8 +24,7 @@ func usage() {
 
 	fmt.Fprintf(os.Stderr, "\n附加信息:")
 	fmt.Fprintf(os.Stderr, "\n 1. -b 和 -B 必须指定1个, 当指定2个中的1个时, 另一个继承指定的值")
-	fmt.Fprintf(os.Stderr, "\n 2. -w 和 -W 指定其中1个时, 另一个继承指定的值")
-	fmt.Fprintf(os.Stderr, "\n 3. 指定对象名(列名,表名), 如需保留原始大小写, 使用对应数据库应用方式, Oracle,pg为双引号,mysql为反引号")
+	fmt.Fprintf(os.Stderr, "\n 2. 指定对象名(列名,表名), 如需保留原始大小写, 使用对应数据库应用方式, Oracle,pg为双引号,mysql为反引号")
 	fmt.Fprintf(os.Stderr, "\n\n下面是一个例子 :")
 	fmt.Fprintf(os.Stderr, "./cksumt -s oracle@scott/triger@192.168.1.1:1521/orcl -t mysql@demo/demo@192.168.1.1:3306/test -m external -c col1,col2,\"c3\" -p 12 -f 100000 -w \" where \"id\" in (select id from t1)\" -W \" where id > 100\" -b db.t1 -B db.t1\n")
 
@@ -43,7 +42,7 @@ func ParseArgs() {
 	dbPara := flag.Int("p", 1, "可选参数, 指定数据库的并行度, 最大16")
 	fetchSize := flag.Int("f", 500000, "可选参数，指定每个分片的大小, 默认500000，过大可能导致内存溢出")
 	sWhere := flag.String("w", "", "可选参数，源库的where条件")
-	tWhere := flag.String("W", "", "可选参数，源库的where条件")
+	tWhere := flag.String("W", "", "可选参数，目标库的where条件")
 	sTable := flag.String("b", "", "可选参数, 指定源库表名, 默认转换为大写, 如果要保留原始大小写，使用双引号")
 	tTable := flag.String("B", "", "可选参数, 指定目标库表名, 默认转换为大写, 如果要保留原始大小写，使用双引号")
 
@@ -169,17 +168,15 @@ func ParseArgs() {
 	}
 
 	// 更新where信息
-	if *tWhere != "" && *sWhere != "" {
+	if *tWhere != "" {
 		common.TWhere = strings.TrimSpace(*tWhere)
-		common.SWhere = strings.TrimSpace(*sWhere)
-	} else if *tWhere != "" {
-		common.TWhere = strings.TrimSpace(*tWhere)
-		common.SWhere = strings.TrimSpace(*tWhere)
-	} else if *sWhere != "" {
-		common.TWhere = strings.TrimSpace(*sWhere)
-		common.SWhere = strings.TrimSpace(*sWhere)
 	} else {
 		common.TWhere = ""
+	}
+
+	if *sWhere != "" {
+		common.SWhere = strings.TrimSpace(*sWhere)
+	} else {
 		common.SWhere = ""
 	}
 

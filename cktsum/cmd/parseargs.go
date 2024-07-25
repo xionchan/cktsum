@@ -245,11 +245,11 @@ func dbParseArgs() {
 
 	// 校验列
 	if !common.AreSliceEqual(sourceList, targetList, false) {
-		fmt.Printf("校验失败 : 源端(%s)和目标端(%s)的列不一致!", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)
+		fmt.Printf("校验失败 : 源端(%s)和目标端(%s)的列不一致!\n", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)
 		os.Exit(1)
 	} else {
 		if common.CMode == "col" {
-			fmt.Printf("校验成功 : 源端(%s)和目标端(%s)的列一致!", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)
+			fmt.Printf("校验成功 : 源端(%s)和目标端(%s)的列一致!\n", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)
 			os.Exit(0)
 		}
 	}

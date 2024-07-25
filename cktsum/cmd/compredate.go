@@ -51,7 +51,7 @@ func Compredate() {
 		os.Exit(1)
 	} else {
 		if common.CMode == "count" {
-			fmt.Printf("校验失败,耗时(%.2f秒) : 源端(%s)和目标端(%s)的总行数不一致 (%s:%d - %s:%d)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
+			fmt.Printf("校验成功,耗时(%.2f秒) : 源端(%s)和目标端(%s)的总行数一致 (%s:%d - %s:%d)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
 				common.ST.Owner+"."+common.ST.Name, sourceCount, common.TT.Owner+"."+common.TT.Name, targetCount)
 			os.Exit(0)
 		}

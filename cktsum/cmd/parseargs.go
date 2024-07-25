@@ -45,6 +45,7 @@ func ParseArgs() {
 	tWhere := flag.String("W", "", "可选参数，目标库的where条件")
 	sTable := flag.String("b", "", "可选参数, 指定源库表名, 默认转换为大写, 如果要保留原始大小写，使用双引号")
 	tTable := flag.String("B", "", "可选参数, 指定目标库表名, 默认转换为大写, 如果要保留原始大小写，使用双引号")
+	cMode := flag.String("M", "all", "可选参数, 指定校验模式, [all|count|col]")
 
 	flag.Parse()
 	flag.Usage = usage
@@ -160,6 +161,14 @@ func ParseArgs() {
 		common.OraMode = *oraMode
 	}
 
+	// 获取数据校验的默认 ：all:校验结构, 行数, hash值; count:校验结构，校验行数; col:校验结构
+	if *cMode != "all" && *cMode != "count" && *cMode != "col" {
+		fmt.Println("程序错误: 数据校验模式只能是 all, count 或者 col")
+		flag.Usage()
+	} else {
+		common.CMode = *cMode
+	}
+
 	// 更新列信息参数
 	if *colStr != "" {
 		common.ColStr = *colStr
@@ -238,5 +247,10 @@ func dbParseArgs() {
 	if !common.AreSliceEqual(sourceList, targetList, false) {
 		fmt.Printf("校验失败 : 源端(%s)和目标端(%s)的列不一致!", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)
 		os.Exit(1)
+	} else {
+		if common.CMode == "col" {
+			fmt.Printf("校验成功 : 源端(%s)和目标端(%s)的列一致!", common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)
+			os.Exit(0)
+		}
 	}
 }

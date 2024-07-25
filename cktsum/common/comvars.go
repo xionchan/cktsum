@@ -20,6 +20,7 @@ var (
 	SPartMode bool         // 源库是否是分区模式
 	TPartMode bool         // 目标库是否是分区模式
 	StartTime time.Time    // 定义程序的开始时间
+	CMode     string       // 定义数据校验的模式
 )
 
 // 定义数据库连接的结构

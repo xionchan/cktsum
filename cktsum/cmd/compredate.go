@@ -44,11 +44,17 @@ func Compredate() {
 
 	sourcewg.Wait()
 	targetwg.Wait()
+	elapsedSeconds := time.Now().Sub(common.StartTime).Seconds()
 	if sourceCount != targetCount {
-		elapsedSeconds := time.Now().Sub(common.StartTime).Seconds()
 		fmt.Printf("校验失败,耗时(%.2f秒) : 源端(%s)和目标端(%s)的总行数不一致 (%s:%d - %s:%d)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
 			common.ST.Owner+"."+common.ST.Name, sourceCount, common.TT.Owner+"."+common.TT.Name, targetCount)
 		os.Exit(1)
+	} else {
+		if common.CMode == "count" {
+			fmt.Printf("校验失败,耗时(%.2f秒) : 源端(%s)和目标端(%s)的总行数不一致 (%s:%d - %s:%d)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
+				common.ST.Owner+"."+common.ST.Name, sourceCount, common.TT.Owner+"."+common.TT.Name, targetCount)
+			os.Exit(0)
+		}
 	}
 
 	if sourceCount == 0 {
@@ -85,7 +91,7 @@ func Compredate() {
 	sourcewg.Wait()
 	targetwg.Wait()
 
-	elapsedSeconds := time.Now().Sub(common.StartTime).Seconds()
+	elapsedSeconds = time.Now().Sub(common.StartTime).Seconds()
 
 	if !sourceCrcSum.Equal(targetCrcSum) {
 		fmt.Printf("校验失败,耗时(%.2f秒) : 源端(%s)和目标端(%s)的校验和不一致 (%s:%s - %s:%s)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,

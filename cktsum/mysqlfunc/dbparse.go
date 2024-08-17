@@ -79,7 +79,8 @@ func dbcheck() {
 			"' and column_name in ('" + strings.Join(tempcollist, "','") + "') order by column_name collate utf8_general_ci"
 	} else { // 需要返回列进行对比
 		colsql = "select column_name from information_schema.columns where table_schema = '" + Table.Owner + "' and table_name = '" + Table.Name +
-			"' and not (column_key = 'PRI' and (extra in ('auto_increment', 'DEFAULT_GENERATED'))) order by column_name collate utf8_general_ci"
+                         "' and not (column_key = 'PRI' and (extra in ('DEFAULT_GENERATED'))) order by column_name collate utf8_general_ci"
+		//	"' and not (column_key = 'PRI' and (extra in ('auto_increment', 'DEFAULT_GENERATED'))) order by column_name collate utf8_general_ci"
 	}
 
 	mysrows, _ := MysConn.Query(colsql)

@@ -5,12 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7cf81b2b-976c-47c1-9f5e-1892d4ffc8e1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/cktsum/cmd/compredate.go_bak" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cktsum/test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cktsum/cktsum" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/cktsum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cktsum/cmd/compredate.go" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/cmd/compredate.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cktsum/common/comvars.go" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/common/comvars.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cktsum/mysqlfunc/dbparse.go" beforeDir="false" afterPath="$PROJECT_DIR$/cktsum/mysqlfunc/dbparse.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,8 +90,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-gosdk-5df93f7ad4aa-dfc284eb1eb8-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-242.20224.39" />
-        <option value="bundled-js-predefined-d6986cc7102b-410509235cf1-JavaScript-GO-242.20224.39" />
+        <option value="bundled-gosdk-5df93f7ad4aa-dfc284eb1eb8-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-242.20224.306" />
+        <option value="bundled-js-predefined-d6986cc7102b-410509235cf1-JavaScript-GO-242.20224.306" />
       </set>
     </attachedChunks>
   </component>

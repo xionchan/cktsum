@@ -28,33 +28,54 @@ func GetCrc32Sum() decimal.Decimal {
 	if !ParaMode {
 		noParaCrc(crc32Chan)
 		close(crc32Chan)
-	} else {
-		idxChan := make(chan colIdx, common.Parallel+1)
-
-		// 更新索引第一列变量
-		getFirstPri()
-
+	} else { // 并行模式, 先判断是通过索引并行,还是分区并行
 		var wg1 sync.WaitGroup
 		var wg2 sync.WaitGroup
 
-		wg1.Add(1)
-		go func() {
-			defer wg1.Done()
-			splitIdx(idxChan)
-		}()
+		isPartTab := checkPartTable()
+		if !isPartTab || PartMode {
+			idxChan := make(chan colIdx, common.Parallel+1)
+			// 更新索引第一列变量
+			getFirstPri()
 
-		for i := 0; i < common.Parallel; i++ {
-			wg2.Add(1)
+			wg1.Add(1)
 			go func() {
-				defer wg2.Done()
-				paraCrc(idxChan, crc32Chan)
+				defer wg1.Done()
+				splitIdx(idxChan)
 			}()
-		}
 
-		wg1.Wait()
-		close(idxChan)
-		wg2.Wait()
-		close(crc32Chan)
+			for i := 0; i < common.Parallel; i++ {
+				wg2.Add(1)
+				go func() {
+					defer wg2.Done()
+					paraCrc(idxChan, crc32Chan)
+				}()
+			}
+
+			wg1.Wait()
+			close(idxChan)
+			wg2.Wait()
+			close(crc32Chan)
+		} else {
+			partChan := make(chan string, common.Parallel+1)
+			wg1.Add(1)
+			go func() {
+				defer wg1.Done()
+				splitPart(partChan)
+			}()
+
+			for i := 0; i < common.Parallel; i++ {
+				wg2.Add(1)
+				go func() {
+					defer wg2.Done()
+					paraPartCrc(partChan, crc32Chan)
+				}()
+			}
+			wg1.Wait()
+			close(partChan)
+			wg2.Wait()
+			close(crc32Chan)
+		}
 	}
 
 	totalCrc32Sum := decimal.NewFromFloat(0.0)
@@ -168,6 +189,28 @@ func genQuerySql() string {
 	return mCrc32Sql + ") from " + Table.Owner + "." + Table.Name + " " + Wherec
 }
 
+// 判断是否是分区表
+func checkPartTable() bool {
+	isPartTab := true
+	getPartTabSql := "select partition_name from INFORMATION_SCHEMA.PARTITIONS where TABLE_SCHEMA = '" + Table.Owner + "' and TABLE_NAME = '" +
+		Table.Name + "' limit 1"
+
+	var valueStr sql.NullString
+	err := MysConn.QueryRow(getPartTabSql).Scan(&valueStr)
+	if err != nil {
+		_, file, line, _ := runtime.Caller(0)
+		log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
+	}
+
+	if valueStr.Valid {
+		isPartTab = true
+	} else {
+		isPartTab = false
+	}
+
+	return isPartTab
+}
+
 // 获取主键索引的第一列
 func getFirstPri() {
 	getIdxColSql := "select column_name from INFORMATION_SCHEMA.STATISTICS where TABLE_SCHEMA = '" + Table.Owner + "' and TABLE_NAME = '" +
@@ -189,7 +232,7 @@ func getFirstPri() {
 	return
 }
 
-// 判断是否要进行拆分，按照主键索引的第一个列拆分
+// 按照主键索引的第一个列拆分
 func splitIdx(idxChan chan colIdx) {
 	/*
 		逻辑 ：
@@ -242,5 +285,30 @@ func splitIdx(idxChan chan colIdx) {
 		}
 		skipnum++
 	}
+	return
+}
+
+// 按照分区进行拆分
+func splitPart(partChan chan string) {
+	getPartNameSql := "select partition_name from INFORMATION_SCHEMA.PARTITIONS where TABLE_SCHEMA = '" + Table.Owner + "' and TABLE_NAME = '" + Table.Name + "'"
+
+	rows, err := MysConn.Query(getPartNameSql)
+	if err != nil {
+		_, file, line, _ := runtime.Caller(0)
+		log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var partName string
+
+		err = rows.Scan(&partName)
+		if err != nil {
+			_, file, line, _ := runtime.Caller(0)
+			log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())
+		}
+		partChan <- partName
+	}
+
 	return
 }

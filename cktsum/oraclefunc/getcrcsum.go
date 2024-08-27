@@ -204,7 +204,7 @@ func genQuerySql() string {
 
 	// 根据db或external构造不同的SQL
 	if common.OraMode == "db" {
-		oCrc32Sql = "select sum(0"
+		oCrc32Sql = "select /*+ no_index(e) */ sum(0"
 		if oVarcharStr != "" {
 			if oCharStr != "" {
 				oCrc32Sql = oCrc32Sql + " + CAL_STR_CRC(" + oVarcharStr + oCharStr[:len(oCharStr)-2] + ")"
@@ -227,7 +227,7 @@ func genQuerySql() string {
 
 		oCrc32Sql = oCrc32Sql + ")"
 	} else {
-		oCrc32Sql = "select "
+		oCrc32Sql = "select /*+ no_index(e) */ "
 		if oVarcharStr != "" {
 			if oCharStr != "" {
 				oCrc32Sql = oCrc32Sql + oVarcharStr + oCharStr[:len(oCharStr)-2]
@@ -249,5 +249,5 @@ func genQuerySql() string {
 		}
 	}
 
-	return oCrc32Sql + " from " + Table.Owner + "." + Table.Name + " " + Wherec
+	return oCrc32Sql + " from " + Table.Owner + "." + Table.Name + " e " + Wherec
 }

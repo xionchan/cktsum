@@ -77,7 +77,7 @@ func Compredate() {
 	go func() {
 		defer coordwg.Done()
 		for {
-			time.Sleep(50 * time.Millisecond)
+			time.Sleep(100 * time.Millisecond)
 			if sourceCDone && targetCDone {
 				elapsedSeconds := time.Now().Sub(common.StartTime).Seconds()
 				if sourceCount != targetCount {
@@ -85,34 +85,32 @@ func Compredate() {
 						common.ST.Owner+"."+common.ST.Name, sourceCount, common.TT.Owner+"."+common.TT.Name, targetCount)
 					os.Exit(0)
 				} else {
-					if common.CMode == "count" {
-						fmt.Printf("校验成功,耗时(%.2f秒) : 源端(%s)和目标端(%s)的总行数一致 (%s:%d - %s:%d)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
-							common.ST.Owner+"."+common.ST.Name, sourceCount, common.TT.Owner+"."+common.TT.Name, targetCount)
-						os.Exit(0)
-					}
-
 					if sourceCount == 0 {
 						fmt.Printf("校验成功,耗时(%.2f秒) : 源端(%s)和目标端(%s)为空表 (%s - %s)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
 							common.ST.Owner+"."+common.ST.Name, common.TT.Owner+"."+common.TT.Name)
 						os.Exit(0)
 					}
+				}
+			}
 
-					// 检查校验和
-					for {
-						time.Sleep(100 * time.Millisecond)
-						if sCrc32Done && tCrc32Done {
-							elapsedSeconds = time.Now().Sub(common.StartTime).Seconds()
-							if !sourceCrcSum.Equal(targetCrcSum) {
-								fmt.Printf("校验失败,耗时(%.2f秒) : 源端(%s)和目标端(%s)的校验和不一致 (%s:%s - %s:%s)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
-									common.ST.Owner+"."+common.ST.Name, sourceCrcSum.StringFixed(4), common.TT.Owner+"."+common.TT.Name, targetCrcSum.StringFixed(4))
-								os.Exit(0)
-							} else {
-								fmt.Printf("校验成功,耗时(%.2f秒) : 源端(%s)和目标端(%s)的校验和一致 (%s:%s - %s:%s)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
-									common.ST.Owner+"."+common.ST.Name, sourceCrcSum.StringFixed(4), common.TT.Owner+"."+common.TT.Name, targetCrcSum.StringFixed(4))
-								os.Exit(0)
-							}
+			if sCrc32Done && tCrc32Done {
+				elapsedSeconds := time.Now().Sub(common.StartTime).Seconds()
+				if !sourceCrcSum.Equal(targetCrcSum) {
+					if sourceCDone && targetCDone {
+						if sourceCount == targetCount {
+							fmt.Printf("校验失败,耗时(%.2f秒) : 源端(%s)和目标端(%s)的校验和不一致 (%s:%s - %s:%s)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
+								common.ST.Owner+"."+common.ST.Name, sourceCrcSum.StringFixed(4), common.TT.Owner+"."+common.TT.Name, targetCrcSum.StringFixed(4))
+							os.Exit(0)
+						} else {
+							fmt.Printf("校验失败,耗时(%.2f秒) : 源端(%s)和目标端(%s)的总行数不一致 (%s:%d - %s:%d)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
+								common.ST.Owner+"."+common.ST.Name, sourceCount, common.TT.Owner+"."+common.TT.Name, targetCount)
+							os.Exit(0)
 						}
 					}
+				} else {
+					fmt.Printf("校验成功,耗时(%.2f秒) : 源端(%s)和目标端(%s)的校验和一致 (%s:%s - %s:%s)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
+						common.ST.Owner+"."+common.ST.Name, sourceCrcSum.StringFixed(4), common.TT.Owner+"."+common.TT.Name, targetCrcSum.StringFixed(4))
+					os.Exit(0)
 				}
 			}
 		}
@@ -122,4 +120,47 @@ func Compredate() {
 	sourcewg.Wait()
 	targetwg.Wait()
 	coordwg.Wait()
+}
+
+// 校验行数
+func CompreCnt() {
+	var sourcewg sync.WaitGroup
+	var targetwg sync.WaitGroup
+
+	// 对比行数
+	var sourceCount, targetCount uint // 存储行count
+	sourcewg.Add(1)
+	go func() {
+		defer sourcewg.Done()
+		if common.SDSN.Type == "oracle" {
+			sourceCount = oraclefunc.GetCount()
+		} else if common.SDSN.Type == "mysql" {
+			sourceCount = mysqlfunc.GetCount()
+		}
+	}()
+
+	targetwg.Add(1)
+	go func() {
+		defer targetwg.Done()
+		if common.TDSN.Type == "oracle" {
+			targetCount = oraclefunc.GetCount()
+		} else if common.TDSN.Type == "mysql" {
+			targetCount = mysqlfunc.GetCount()
+		}
+	}()
+
+	sourcewg.Wait()
+	targetwg.Wait()
+
+	elapsedSeconds := time.Now().Sub(common.StartTime).Seconds()
+
+	if sourceCount != targetCount {
+		fmt.Printf("校验失败,耗时(%.2f秒) : 源端(%s)和目标端(%s)的总行数不一致 (%s:%d - %s:%d)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
+			common.ST.Owner+"."+common.ST.Name, sourceCount, common.TT.Owner+"."+common.TT.Name, targetCount)
+		os.Exit(0)
+	} else {
+		fmt.Printf("校验成功,耗时(%.2f秒) : 源端(%s)和目标端(%s)的总行数一致 (%s:%d - %s:%d)\n", elapsedSeconds, common.SDSN.Type, common.TDSN.Type,
+			common.ST.Owner+"."+common.ST.Name, sourceCount, common.TT.Owner+"."+common.TT.Name, targetCount)
+		os.Exit(0)
+	}
 }

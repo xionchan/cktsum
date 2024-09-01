@@ -45,7 +45,7 @@ func extNoParaGetCrc32(partcrc chan decimal.Decimal) {
 	}
 
 	// 格式化时间格式
-	_, err = OraConn.Exec("alter session set nls_date_format = 'yyyy-mm-dd'")
+	_, err = OraConn.Exec("alter session set nls_date_format = 'yyyy-mm-dd hh24:mi:ss'")
 	if err != nil {
 		_, file, line, _ := runtime.Caller(0)
 		log.Fatalf("程序错误(%s) : 报错位置 %s:%d (%s) \n", Table.Owner+"."+Table.Name, file, line, err.Error())

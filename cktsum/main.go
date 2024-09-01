@@ -4,9 +4,14 @@ package main
 
 import (
 	"cktsum/cmd"
+	"cktsum/common"
 )
 
 func main() {
 	cmd.ParseArgs()
-	cmd.Compredate()
+	if common.CMode == "all" {
+		cmd.Compredate()
+	} else if common.CMode == "count" {
+		cmd.CompreCnt()
+	}
 }
